@@ -55,6 +55,10 @@ Raw historical market context JSON
 
 The MCP server should not bypass Konseki public API behavior. It should behave like any other public API client.
 
+## Response Compression
+
+The server requests gzip-compressed API responses and decompresses them locally before returning JSON to the MCP client. This is handled automatically; users do not need to configure compression.
+
 ## Installation
 
 Install dependencies for local development:

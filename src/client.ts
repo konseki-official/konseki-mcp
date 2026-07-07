@@ -1,6 +1,10 @@
+import { gunzip } from "node:zlib";
+import { promisify } from "node:util";
 import { KONSEKI_API_ORIGIN, KONSEKI_REQUEST_TIMEOUT_MS, type KonsekiMcpConfig } from "./config.js";
 
 export type ApiJsonObject = Record<string, unknown>;
+
+const gunzipAsync = promisify(gunzip);
 
 export type KonsekiApiResult =
   | {
@@ -59,6 +63,7 @@ export class KonsekiApiClient {
       const response = await this.fetchImpl(url, {
         headers: {
           Accept: "application/json",
+          "Accept-Encoding": "gzip",
           "X-API-Key": this.apiKey,
         },
         method: "GET",
@@ -109,7 +114,7 @@ async function parseJsonObject(
   response: Response,
 ): Promise<{ json: ApiJsonObject; ok: true } | { message: string; ok: false }> {
   try {
-    const json = (await response.json()) as unknown;
+    const json = JSON.parse(await responseBodyText(response)) as unknown;
 
     if (!isJsonObject(json)) {
       return {
@@ -128,6 +133,17 @@ async function parseJsonObject(
       ok: false,
     };
   }
+}
+
+async function responseBodyText(response: Response): Promise<string> {
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  const decompressed = isGzip(bytes) ? await gunzipAsync(bytes) : bytes;
+
+  return new TextDecoder().decode(decompressed);
+}
+
+function isGzip(bytes: Uint8Array): boolean {
+  return bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
 }
 
 function isJsonObject(value: unknown): value is ApiJsonObject {

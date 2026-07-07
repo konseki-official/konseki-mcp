@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { gzipSync } from "node:zlib";
 import { KonsekiApiClient } from "../src/client.js";
 
 const apiKey = "ks_live_test_key";
@@ -35,6 +36,7 @@ describe("KonsekiApiClient", () => {
     expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/metadata");
     expect(requestHeaders(fetchImpl.mock.calls[0]?.[1])).toMatchObject({
       Accept: "application/json",
+      "Accept-Encoding": "gzip",
       "X-API-Key": apiKey,
     });
   });
@@ -82,6 +84,28 @@ describe("KonsekiApiClient", () => {
       },
       ok: false,
       status: 401,
+    });
+  });
+
+  it("parses gzip-compressed JSON responses", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(
+      async () =>
+        new Response(gzipSync(JSON.stringify({ compressed: true })), {
+          headers: {
+            "Content-Encoding": "gzip",
+            "Content-Type": "application/json",
+          },
+          status: 200,
+        }),
+    );
+    const client = createClient(fetchImpl);
+
+    await expect(client.getMetadata()).resolves.toMatchObject({
+      json: {
+        compressed: true,
+      },
+      ok: true,
+      status: 200,
     });
   });
 
