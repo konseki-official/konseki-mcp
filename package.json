@@ -9,13 +9,16 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "LICENSE",
+    "README.md",
+    "SECURITY.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm run typecheck",
-    "lint": "npm run typecheck"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "lint": "npm run typecheck",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
   },
   "keywords": [
     "konseki",
@@ -26,13 +29,17 @@
     "historical-context"
   ],
   "author": "Konseki",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }
