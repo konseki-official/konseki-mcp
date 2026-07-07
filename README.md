@@ -33,7 +33,6 @@ get_konseki_analysis(symbol, exchange, lookback)
 The local MCP server should read configuration from environment variables:
 
 ```sh
-KONSEKI_API_BASE_URL=https://api.konseki.io
 KONSEKI_API_KEY=ks_live_your_api_key
 ```
 

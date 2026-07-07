@@ -1,10 +1,10 @@
 export type KonsekiMcpConfig = {
-  apiBaseUrl: string;
   apiKey: string;
 };
 
+export const KONSEKI_API_ORIGIN = "https://api.konseki.io";
+
 export function loadConfigFromEnv(env: Record<string, string | undefined> = process.env): KonsekiMcpConfig {
-  const apiBaseUrl = env.KONSEKI_API_BASE_URL?.trim() || "https://api.konseki.io";
   const apiKey = env.KONSEKI_API_KEY?.trim();
 
   if (!apiKey) {
@@ -12,7 +12,6 @@ export function loadConfigFromEnv(env: Record<string, string | undefined> = proc
   }
 
   return {
-    apiBaseUrl,
     apiKey,
   };
 }
