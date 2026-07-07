@@ -5,7 +5,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
-      "ES2023"
+      "ES2023",
+      "DOM"
     ],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -13,10 +14,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
-    "target": "ES2023"
+    "target": "ES2023",
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts"
   ]
 }
-
