@@ -2,6 +2,8 @@
 
 Official Model Context Protocol server for Konseki.
 
+Konseki is a pre-computed historical market context API for global equities, built for AI trading and quants. It matches current market conditions against historical analogs and returns structured pattern-match data, outcome distributions, and match-quality scores, grounding an AI agent's reasoning in evidence rather than generic commentary.
+
 Konseki MCP is a direct wrapper around the Konseki public API. It lets AI agents and AI trading tools call Konseki endpoints through MCP tools while preserving the raw API response JSON for the user or downstream application to interpret.
 
 Published package: [`@konseki/mcp`](https://www.npmjs.com/package/@konseki/mcp)
