@@ -4,9 +4,10 @@ Official Model Context Protocol server for Konseki.
 
 Konseki MCP is a direct wrapper around the Konseki public API. It lets AI agents and AI trading tools call Konseki endpoints through MCP tools while preserving the raw API response JSON for the user or downstream application to interpret.
 
-## Status
+## Requirements
 
-This package provides a local `stdio` MCP server that calls the Konseki public API with a user-provided API key.
+- Node.js 20 or newer.
+- A Konseki API key.
 
 ## Design Principles
 
@@ -15,28 +16,15 @@ This package provides a local `stdio` MCP server that calls the Konseki public A
 - Public API only: the server uses `X-API-Key` against documented Konseki endpoints.
 - No internal credentials: non-public service or operational credentials are never required for this package.
 
-## Tool Surface
-
-```text
-get_konseki_metadata()
-  -> GET /v1/metadata
-
-list_konseki_symbols()
-  -> GET /v1/symbols
-
-get_konseki_analysis(symbol, exchange, lookback)
-  -> GET /v1/analysis/{symbol}-{exchange}?lookback={lookback}
-```
-
 ## Configuration
 
-The local MCP server reads configuration from environment variables:
+The server reads configuration from environment variables:
 
 ```sh
 KONSEKI_API_KEY=ks_live_your_api_key
 ```
 
-Use `.env.example` as a safe template. Do not commit real API keys.
+Do not commit real API keys.
 
 ## Intended Architecture
 
@@ -54,58 +42,6 @@ Raw historical market context JSON
 ```
 
 The MCP server should not bypass Konseki public API behavior. It should behave like any other public API client.
-
-## Response Compression
-
-The server requests gzip-compressed API responses and decompresses them locally before returning JSON to the MCP client. This is handled automatically; users do not need to configure compression.
-
-## Installation
-
-Install dependencies for local development:
-
-```sh
-npm install
-```
-
-Build the server:
-
-```sh
-npm run build
-```
-
-## MCP Client Configuration
-
-For local development from this checkout, configure your MCP client to run the built server:
-
-```json
-{
-  "mcpServers": {
-    "konseki": {
-      "command": "node",
-      "args": ["/absolute/path/to/konseki-mcp/dist/index.js"],
-      "env": {
-        "KONSEKI_API_KEY": "ks_live_your_api_key"
-      }
-    }
-  }
-}
-```
-
-After publishing to npm, clients can run the package command instead:
-
-```json
-{
-  "mcpServers": {
-    "konseki": {
-      "command": "npx",
-      "args": ["@konseki/mcp"],
-      "env": {
-        "KONSEKI_API_KEY": "ks_live_your_api_key"
-      }
-    }
-  }
-}
-```
 
 ## Tools
 
@@ -137,18 +73,57 @@ Input:
 
 Supported `lookback` values: `5`, `10`, `15`, `20`, `25`, `30`, `40`, `50`.
 
+## Response Compression
+
+The server requests gzip-compressed API responses and decompresses them locally before returning JSON to the MCP client. This is handled automatically; users do not need to configure compression.
+
+## Installation
+
+Use the package through an MCP client with `npx`:
+
+```json
+{
+  "mcpServers": {
+    "konseki": {
+      "command": "npx",
+      "args": ["-y", "@konseki/mcp"],
+      "env": {
+        "KONSEKI_API_KEY": "ks_live_your_api_key"
+      }
+    }
+  }
+}
+```
+
+For local development from this checkout, configure your MCP client to run the built server:
+
+```json
+{
+  "mcpServers": {
+    "konseki": {
+      "command": "node",
+      "args": ["/absolute/path/to/konseki-mcp/dist/index.js"],
+      "env": {
+        "KONSEKI_API_KEY": "ks_live_your_api_key"
+      }
+    }
+  }
+}
+```
+
 ## Development
+
+Install dependencies:
+
+```sh
+npm install
+```
 
 Run verification:
 
 ```sh
 npm run typecheck
 npm test
-```
-
-Build the package:
-
-```sh
 npm run build
 ```
 
