@@ -4,6 +4,8 @@ Official Model Context Protocol server for Konseki.
 
 Konseki MCP is a direct wrapper around the Konseki public API. It lets AI agents and AI trading tools call Konseki endpoints through MCP tools while preserving the raw API response JSON for the user or downstream application to interpret.
 
+Published package: [`@konseki/mcp`](https://www.npmjs.com/package/@konseki/mcp)
+
 ## Requirements
 
 - Node.js 20 or newer.
@@ -79,7 +81,7 @@ The server requests gzip-compressed API responses and decompresses them locally 
 
 ## Installation
 
-Use the package through an MCP client with `npx`:
+Use the published npm package through an MCP client with `npx`:
 
 ```json
 {
@@ -95,7 +97,16 @@ Use the package through an MCP client with `npx`:
 }
 ```
 
-For local development from this checkout, configure your MCP client to run the built server:
+This is the recommended configuration for users who want the official released package from npm.
+
+## Local Development
+
+For development from this checkout, install dependencies, build the package, and configure your MCP client to run the built server:
+
+```sh
+npm install
+npm run build
+```
 
 ```json
 {
