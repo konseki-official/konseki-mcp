@@ -1,6 +1,6 @@
 {
   "name": "@konseki/mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Konseki MCP server: a direct AI-agent wrapper around the Konseki public API for historical market context.",
   "private": false,
   "type": "module",
