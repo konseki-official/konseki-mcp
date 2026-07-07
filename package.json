@@ -1,0 +1,38 @@
+{
+  "name": "@konseki/mcp",
+  "version": "0.1.0",
+  "description": "Official Konseki MCP server: a direct AI-agent wrapper around the Konseki public API for historical market context.",
+  "private": false,
+  "type": "module",
+  "bin": {
+    "konseki-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run typecheck",
+    "lint": "npm run typecheck"
+  },
+  "keywords": [
+    "konseki",
+    "mcp",
+    "model-context-protocol",
+    "trading",
+    "market-data",
+    "historical-context"
+  ],
+  "author": "Konseki",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^6.0.3"
+  }
+}
