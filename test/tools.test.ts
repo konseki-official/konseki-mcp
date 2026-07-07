@@ -1,0 +1,151 @@
+import { describe, expect, it, vi } from "vitest";
+import type { KonsekiApiClient } from "../src/client.js";
+import {
+  apiResultToToolResult,
+  createAnalysisToolHandler,
+  jsonToolResult,
+  normalizeAnalysisInput,
+  safeErrorResult,
+} from "../src/tools.js";
+
+describe("normalizeAnalysisInput", () => {
+  it("uppercases symbol and exchange and normalizes lookback", () => {
+    expect(
+      normalizeAnalysisInput({
+        exchange: "nasdaq",
+        lookback: 15,
+        symbol: "aapl",
+      }),
+    ).toEqual({
+      exchange: "NASDAQ",
+      lookback: "15",
+      symbol: "AAPL",
+    });
+  });
+
+  it("rejects unsupported lookback values before fetch", () => {
+    expect(() =>
+      normalizeAnalysisInput({
+        exchange: "NASDAQ",
+        lookback: 12,
+        symbol: "AAPL",
+      }),
+    ).toThrow("Unsupported lookback value.");
+  });
+});
+
+describe("tool result helpers", () => {
+  it("preserves raw JSON in structuredContent and serialized text", () => {
+    const payload = {
+      meta: {
+        schema_version: "1.0",
+      },
+    };
+
+    expect(jsonToolResult(payload)).toEqual({
+      content: [
+        {
+          text: JSON.stringify(payload, null, 2),
+          type: "text",
+        },
+      ],
+      structuredContent: payload,
+    });
+  });
+
+  it("marks API error JSON as MCP tool errors", () => {
+    const payload = {
+      error: "unauthorized",
+      message: "Missing or invalid API key.",
+    };
+
+    expect(
+      apiResultToToolResult({
+        json: payload,
+        message: "Konseki API returned HTTP 401.",
+        ok: false,
+        status: 401,
+      }),
+    ).toEqual({
+      content: [
+        {
+          text: JSON.stringify(payload, null, 2),
+          type: "text",
+        },
+      ],
+      isError: true,
+      structuredContent: payload,
+    });
+  });
+
+  it("returns safe error text without structured content for local failures", () => {
+    expect(safeErrorResult("Unable to reach Konseki API.")).toEqual({
+      content: [
+        {
+          text: "Unable to reach Konseki API.",
+          type: "text",
+        },
+      ],
+      isError: true,
+    });
+  });
+});
+
+describe("analysis tool handler", () => {
+  it("does not call the API client when lookback validation fails", async () => {
+    const client = {
+      getAnalysis: vi.fn(),
+    } as unknown as KonsekiApiClient;
+    const handler = createAnalysisToolHandler(client);
+    const result = await handler({
+      exchange: "NASDAQ",
+      lookback: 12,
+      symbol: "AAPL",
+    });
+
+    expect(result).toMatchObject({
+      isError: true,
+    });
+    expect(client.getAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("does not call the API client when symbol validation fails", async () => {
+    const client = {
+      getAnalysis: vi.fn(),
+    } as unknown as KonsekiApiClient;
+    const handler = createAnalysisToolHandler(client);
+    const result = await handler({
+      exchange: "NASDAQ",
+      lookback: 15,
+      symbol: "AAPL/USD",
+    });
+
+    expect(result).toEqual({
+      content: [
+        {
+          text: "Invalid analysis request.",
+          type: "text",
+        },
+      ],
+      isError: true,
+    });
+    expect(client.getAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("does not call the API client when exchange validation fails", async () => {
+    const client = {
+      getAnalysis: vi.fn(),
+    } as unknown as KonsekiApiClient;
+    const handler = createAnalysisToolHandler(client);
+    const result = await handler({
+      exchange: "NAS-DAQ",
+      lookback: 15,
+      symbol: "AAPL",
+    });
+
+    expect(result).toMatchObject({
+      isError: true,
+    });
+    expect(client.getAnalysis).not.toHaveBeenCalled();
+  });
+});

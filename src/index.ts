@@ -1,17 +1,33 @@
-export type KonsekiMcpConfig = {
-  apiKey: string;
-};
+#!/usr/bin/env node
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { pathToFileURL } from "node:url";
+import { KonsekiApiClient } from "./client.js";
+import { loadConfigFromEnv } from "./config.js";
+import { createKonsekiMcpServer } from "./server.js";
 
-export const KONSEKI_API_ORIGIN = "https://api.konseki.io";
+export { KonsekiApiClient } from "./client.js";
+export { KONSEKI_API_ORIGIN, KONSEKI_REQUEST_TIMEOUT_MS, loadConfigFromEnv, type KonsekiMcpConfig } from "./config.js";
+export { createKonsekiMcpServer } from "./server.js";
+export { normalizeAnalysisInput } from "./tools.js";
 
-export function loadConfigFromEnv(env: Record<string, string | undefined> = process.env): KonsekiMcpConfig {
-  const apiKey = env.KONSEKI_API_KEY?.trim();
+async function main(): Promise<void> {
+  const config = loadConfigFromEnv();
+  const client = new KonsekiApiClient(config);
+  const server = createKonsekiMcpServer(client);
 
-  if (!apiKey) {
-    throw new Error("KONSEKI_API_KEY is required.");
-  }
+  await server.connect(new StdioServerTransport());
+}
 
-  return {
-    apiKey,
-  };
+if (isCliEntryPoint()) {
+  main().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : "Unable to start Konseki MCP server.";
+    console.error(message);
+    process.exit(1);
+  });
+}
+
+function isCliEntryPoint(): boolean {
+  const entrypoint = process.argv[1];
+
+  return entrypoint ? import.meta.url === pathToFileURL(entrypoint).href : false;
 }

@@ -1,0 +1,18 @@
+export type KonsekiMcpConfig = {
+  apiKey: string;
+};
+
+export const KONSEKI_API_ORIGIN = "https://api.konseki.io";
+export const KONSEKI_REQUEST_TIMEOUT_MS = 30_000;
+
+export function loadConfigFromEnv(env: Record<string, string | undefined> = process.env): KonsekiMcpConfig {
+  const apiKey = env.KONSEKI_API_KEY?.trim();
+
+  if (!apiKey) {
+    throw new Error("KONSEKI_API_KEY is required.");
+  }
+
+  return {
+    apiKey,
+  };
+}

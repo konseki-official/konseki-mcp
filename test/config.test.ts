@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { KONSEKI_API_ORIGIN, loadConfigFromEnv } from "../src/index.js";
+import { KONSEKI_API_ORIGIN, loadConfigFromEnv } from "../src/config.js";
 
 describe("loadConfigFromEnv", () => {
   it("requires KONSEKI_API_KEY", () => {
