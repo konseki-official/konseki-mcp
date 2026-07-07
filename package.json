@@ -1,9 +1,17 @@
 {
   "name": "@konseki/mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Official Konseki MCP server: a direct AI-agent wrapper around the Konseki public API for historical market context.",
   "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/konseki-io/konseki-mcp.git"
+  },
+  "homepage": "https://konseki.io",
+  "bugs": {
+    "url": "https://github.com/konseki-io/konseki-mcp/issues"
+  },
   "bin": {
     "konseki-mcp": "dist/index.js"
   },

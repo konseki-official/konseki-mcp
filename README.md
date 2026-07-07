@@ -11,6 +11,8 @@ Published package: [`@konseki/mcp`](https://www.npmjs.com/package/@konseki/mcp)
 - Node.js 20 or newer.
 - A Konseki API key.
 
+Get an API key from [konseki.io](https://konseki.io).
+
 ## Design Principles
 
 - Direct API wrapper: the MCP server fetches Konseki API responses and returns them without interpretation.
