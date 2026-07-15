@@ -4,21 +4,43 @@ import type { ApiJsonObject, KonsekiApiClient, KonsekiApiResult } from "./client
 
 const supportedLookbacks = new Set(["5", "10", "15", "20", "25", "30", "40", "50"]);
 
+export const countryInputSchema = {
+  country: z.string().trim().regex(/^[A-Za-z]{2}$/, "country must be an ISO 3166-1 alpha-2 code"),
+};
+
 export const analysisInputSchema = {
+  ...countryInputSchema,
   exchange: z.string().trim().min(1).regex(/^[A-Za-z]+$/, "exchange must contain only letters"),
   lookback: z.union([z.string(), z.number()]),
   symbol: z.string().trim().min(1).regex(/^[A-Za-z0-9.]+$/, "symbol must contain only letters, numbers, and dots"),
 };
 
 const analysisInputObjectSchema = z.object(analysisInputSchema);
+const countryInputObjectSchema = z.object(countryInputSchema);
 
 export type AnalysisInput = {
+  country: string;
   exchange: string;
   lookback: number | string;
   symbol: string;
 };
 
-export function normalizeAnalysisInput(input: AnalysisInput): { exchange: string; lookback: string; symbol: string } {
+export type CountryInput = {
+  country: string;
+};
+
+export function normalizeCountryInput(input: CountryInput): { country: string } {
+  return {
+    country: input.country.trim().toUpperCase(),
+  };
+}
+
+export function normalizeAnalysisInput(input: AnalysisInput): {
+  country: string;
+  exchange: string;
+  lookback: string;
+  symbol: string;
+} {
   const lookback = String(input.lookback).trim();
 
   if (!supportedLookbacks.has(lookback)) {
@@ -26,6 +48,7 @@ export function normalizeAnalysisInput(input: AnalysisInput): { exchange: string
   }
 
   return {
+    country: input.country.trim().toUpperCase(),
     exchange: input.exchange.trim().toUpperCase(),
     lookback,
     symbol: input.symbol.trim().toUpperCase(),
@@ -71,12 +94,32 @@ export function safeErrorResult(message: string): CallToolResult {
   };
 }
 
-export function createMetadataToolHandler(client: KonsekiApiClient): () => Promise<CallToolResult> {
-  return async () => apiResultToToolResult(await client.getMetadata());
+export function createMetadataToolHandler(client: KonsekiApiClient): (input: CountryInput) => Promise<CallToolResult> {
+  return async (input) => {
+    try {
+      const normalizedInput = normalizeCountryInput(countryInputObjectSchema.parse(input));
+
+      return apiResultToToolResult(await client.getMetadata(normalizedInput.country));
+    } catch {
+      return safeErrorResult("Invalid country request.");
+    }
+  };
 }
 
-export function createSymbolsToolHandler(client: KonsekiApiClient): () => Promise<CallToolResult> {
-  return async () => apiResultToToolResult(await client.listSymbols());
+export function createCountriesToolHandler(client: KonsekiApiClient): () => Promise<CallToolResult> {
+  return async () => apiResultToToolResult(await client.listCountries());
+}
+
+export function createSymbolsToolHandler(client: KonsekiApiClient): (input: CountryInput) => Promise<CallToolResult> {
+  return async (input) => {
+    try {
+      const normalizedInput = normalizeCountryInput(countryInputObjectSchema.parse(input));
+
+      return apiResultToToolResult(await client.listSymbols(normalizedInput.country));
+    } catch {
+      return safeErrorResult("Invalid country request.");
+    }
+  };
 }
 
 export function createAnalysisToolHandler(client: KonsekiApiClient): (input: AnalysisInput) => Promise<CallToolResult> {
