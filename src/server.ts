@@ -3,6 +3,7 @@ import type { KonsekiApiClient } from "./client.js";
 import {
   analysisInputSchema,
   createAnalysisToolHandler,
+  createCountriesToolHandler,
   createMetadataToolHandler,
   createSymbolsToolHandler,
 } from "./tools.js";
@@ -20,6 +21,15 @@ export function createKonsekiMcpServer(client: KonsekiApiClient): McpServer {
       title: "Get Konseki Metadata",
     },
     createMetadataToolHandler(client),
+  );
+
+  server.registerTool(
+    "list_konseki_countries",
+    {
+      description: "Fetch raw covered countries JSON from the Konseki public API.",
+      title: "List Konseki Countries",
+    },
+    createCountriesToolHandler(client),
   );
 
   server.registerTool(

@@ -57,6 +57,12 @@ Fetches raw JSON from `GET /v1/metadata`.
 
 Input: none.
 
+### `list_konseki_countries`
+
+Fetches raw JSON from `GET /v1/countries`.
+
+Input: none.
+
 ### `list_konseki_symbols`
 
 Fetches raw JSON from `GET /v1/symbols`.

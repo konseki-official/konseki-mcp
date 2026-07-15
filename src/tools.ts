@@ -75,6 +75,10 @@ export function createMetadataToolHandler(client: KonsekiApiClient): () => Promi
   return async () => apiResultToToolResult(await client.getMetadata());
 }
 
+export function createCountriesToolHandler(client: KonsekiApiClient): () => Promise<CallToolResult> {
+  return async () => apiResultToToolResult(await client.listCountries());
+}
+
 export function createSymbolsToolHandler(client: KonsekiApiClient): () => Promise<CallToolResult> {
   return async () => apiResultToToolResult(await client.listSymbols());
 }

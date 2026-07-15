@@ -41,6 +41,32 @@ describe("KonsekiApiClient", () => {
     });
   });
 
+  it("fetches countries from the fixed API origin with the API key header", async () => {
+    const payload = {
+      countries: [
+        {
+          code: "US",
+          name: "United States",
+        },
+      ],
+    };
+    const fetchImpl = vi.fn<typeof fetch>(async () => Response.json(payload));
+    const client = createClient(fetchImpl);
+
+    await expect(client.listCountries()).resolves.toMatchObject({
+      json: payload,
+      ok: true,
+      status: 200,
+    });
+
+    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/countries");
+    expect(requestHeaders(fetchImpl.mock.calls[0]?.[1])).toMatchObject({
+      Accept: "application/json",
+      "Accept-Encoding": "gzip",
+      "X-API-Key": apiKey,
+    });
+  });
+
   it("fetches symbols from the fixed API origin", async () => {
     const fetchImpl = vi.fn<typeof fetch>(async () => Response.json({ symbols: [] }));
     const client = createClient(fetchImpl);

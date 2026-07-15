@@ -41,6 +41,10 @@ export class KonsekiApiClient {
     return this.request("/v1/metadata");
   }
 
+  async listCountries(): Promise<KonsekiApiResult> {
+    return this.request("/v1/countries");
+  }
+
   async listSymbols(): Promise<KonsekiApiResult> {
     return this.request("/v1/symbols");
   }

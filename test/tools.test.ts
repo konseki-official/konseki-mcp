@@ -3,6 +3,7 @@ import type { KonsekiApiClient } from "../src/client.js";
 import {
   apiResultToToolResult,
   createAnalysisToolHandler,
+  createCountriesToolHandler,
   jsonToolResult,
   normalizeAnalysisInput,
   safeErrorResult,
@@ -86,6 +87,49 @@ describe("tool result helpers", () => {
           type: "text",
         },
       ],
+      isError: true,
+    });
+  });
+});
+
+describe("countries tool handler", () => {
+  it("preserves the raw countries API payload", async () => {
+    const payload = {
+      countries: [
+        {
+          code: "CN",
+          name: "China",
+        },
+      ],
+    };
+    const client = {
+      listCountries: vi.fn(async () => ({
+        json: payload,
+        ok: true as const,
+        status: 200,
+      })),
+    } as unknown as KonsekiApiClient;
+
+    await expect(createCountriesToolHandler(client)()).resolves.toEqual(jsonToolResult(payload));
+    expect(client.listCountries).toHaveBeenCalledOnce();
+  });
+
+  it("returns API error JSON as an MCP tool error", async () => {
+    const payload = {
+      error: "unauthorized",
+      message: "Missing or invalid API key.",
+    };
+    const client = {
+      listCountries: vi.fn(async () => ({
+        json: payload,
+        message: "Konseki API returned HTTP 401.",
+        ok: false as const,
+        status: 401,
+      })),
+    } as unknown as KonsekiApiClient;
+
+    await expect(createCountriesToolHandler(client)()).resolves.toEqual({
+      ...jsonToolResult(payload),
       isError: true,
     });
   });
