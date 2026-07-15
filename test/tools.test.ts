@@ -4,8 +4,11 @@ import {
   apiResultToToolResult,
   createAnalysisToolHandler,
   createCountriesToolHandler,
+  createMetadataToolHandler,
+  createSymbolsToolHandler,
   jsonToolResult,
   normalizeAnalysisInput,
+  normalizeCountryInput,
   safeErrorResult,
 } from "../src/tools.js";
 
@@ -13,11 +16,13 @@ describe("normalizeAnalysisInput", () => {
   it("uppercases symbol and exchange and normalizes lookback", () => {
     expect(
       normalizeAnalysisInput({
+        country: "us",
         exchange: "nasdaq",
         lookback: 15,
         symbol: "aapl",
       }),
     ).toEqual({
+      country: "US",
       exchange: "NASDAQ",
       lookback: "15",
       symbol: "AAPL",
@@ -27,11 +32,18 @@ describe("normalizeAnalysisInput", () => {
   it("rejects unsupported lookback values before fetch", () => {
     expect(() =>
       normalizeAnalysisInput({
+        country: "US",
         exchange: "NASDAQ",
         lookback: 12,
         symbol: "AAPL",
       }),
     ).toThrow("Unsupported lookback value.");
+  });
+});
+
+describe("normalizeCountryInput", () => {
+  it("uppercases country codes", () => {
+    expect(normalizeCountryInput({ country: "us" })).toEqual({ country: "US" });
   });
 });
 
@@ -135,13 +147,53 @@ describe("countries tool handler", () => {
   });
 });
 
+describe("country-scoped tool handlers", () => {
+  it("normalizes country before fetching metadata", async () => {
+    const payload = { latest: "2026-07-14" };
+    const client = {
+      getMetadata: vi.fn(async () => ({ json: payload, ok: true as const, status: 200 })),
+    } as unknown as KonsekiApiClient;
+
+    await expect(createMetadataToolHandler(client)({ country: "us" })).resolves.toEqual(jsonToolResult(payload));
+    expect(client.getMetadata).toHaveBeenCalledWith("US");
+  });
+
+  it("rejects malformed country before fetching symbols", async () => {
+    const client = {
+      listSymbols: vi.fn(),
+    } as unknown as KonsekiApiClient;
+
+    await expect(createSymbolsToolHandler(client)({ country: "USA" })).resolves.toEqual(
+      safeErrorResult("Invalid country request."),
+    );
+    expect(client.listSymbols).not.toHaveBeenCalled();
+  });
+});
+
 describe("analysis tool handler", () => {
+  it("does not call the API client when country validation fails", async () => {
+    const client = {
+      getAnalysis: vi.fn(),
+    } as unknown as KonsekiApiClient;
+    const handler = createAnalysisToolHandler(client);
+    const result = await handler({
+      country: "USA",
+      exchange: "NASDAQ",
+      lookback: 15,
+      symbol: "AAPL",
+    });
+
+    expect(result).toEqual(safeErrorResult("Invalid analysis request."));
+    expect(client.getAnalysis).not.toHaveBeenCalled();
+  });
+
   it("does not call the API client when lookback validation fails", async () => {
     const client = {
       getAnalysis: vi.fn(),
     } as unknown as KonsekiApiClient;
     const handler = createAnalysisToolHandler(client);
     const result = await handler({
+      country: "US",
       exchange: "NASDAQ",
       lookback: 12,
       symbol: "AAPL",
@@ -159,6 +211,7 @@ describe("analysis tool handler", () => {
     } as unknown as KonsekiApiClient;
     const handler = createAnalysisToolHandler(client);
     const result = await handler({
+      country: "US",
       exchange: "NASDAQ",
       lookback: 15,
       symbol: "AAPL/USD",
@@ -182,6 +235,7 @@ describe("analysis tool handler", () => {
     } as unknown as KonsekiApiClient;
     const handler = createAnalysisToolHandler(client);
     const result = await handler({
+      country: "US",
       exchange: "NAS-DAQ",
       lookback: 15,
       symbol: "AAPL",

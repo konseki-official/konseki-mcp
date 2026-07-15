@@ -53,9 +53,15 @@ The MCP server should not bypass Konseki public API behavior. It should behave l
 
 ### `get_konseki_metadata`
 
-Fetches raw JSON from `GET /v1/metadata`.
+Fetches raw JSON from `GET /v1/metadata?country={country}`.
 
-Input: none.
+Input:
+
+```json
+{
+  "country": "US"
+}
+```
 
 ### `list_konseki_countries`
 
@@ -65,18 +71,25 @@ Input: none.
 
 ### `list_konseki_symbols`
 
-Fetches raw JSON from `GET /v1/symbols`.
-
-Input: none.
-
-### `get_konseki_analysis`
-
-Fetches raw JSON from `GET /v1/analysis/{symbol}-{exchange}?lookback={lookback}`.
+Fetches raw JSON from `GET /v1/symbols?country={country}`.
 
 Input:
 
 ```json
 {
+  "country": "US"
+}
+```
+
+### `get_konseki_analysis`
+
+Fetches raw JSON from `GET /v1/analysis/{symbol}-{exchange}?country={country}&lookback={lookback}`.
+
+Input:
+
+```json
+{
+  "country": "US",
   "symbol": "AAPL",
   "exchange": "NASDAQ",
   "lookback": 15

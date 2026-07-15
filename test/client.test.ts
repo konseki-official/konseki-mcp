@@ -25,7 +25,7 @@ describe("KonsekiApiClient", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () => Response.json({ ok: true }));
     const client = createClient(fetchImpl);
 
-    await expect(client.getMetadata()).resolves.toMatchObject({
+    await expect(client.getMetadata("US")).resolves.toMatchObject({
       json: {
         ok: true,
       },
@@ -33,7 +33,7 @@ describe("KonsekiApiClient", () => {
       status: 200,
     });
 
-    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/metadata");
+    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/metadata?country=US");
     expect(requestHeaders(fetchImpl.mock.calls[0]?.[1])).toMatchObject({
       Accept: "application/json",
       "Accept-Encoding": "gzip",
@@ -71,9 +71,9 @@ describe("KonsekiApiClient", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () => Response.json({ symbols: [] }));
     const client = createClient(fetchImpl);
 
-    await client.listSymbols();
+    await client.listSymbols("US");
 
-    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/symbols");
+    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/symbols?country=US");
   });
 
   it("fetches analysis with normalized path and query values", async () => {
@@ -81,12 +81,15 @@ describe("KonsekiApiClient", () => {
     const client = createClient(fetchImpl);
 
     await client.getAnalysis({
+      country: "US",
       exchange: "NASDAQ",
       lookback: "15",
       symbol: "AAPL",
     });
 
-    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe("https://api.konseki.io/v1/analysis/AAPL-NASDAQ?lookback=15");
+    expect(String(fetchImpl.mock.calls[0]?.[0])).toBe(
+      "https://api.konseki.io/v1/analysis/AAPL-NASDAQ?country=US&lookback=15",
+    );
   });
 
   it("preserves API error JSON and marks the result as failed", async () => {
@@ -103,7 +106,7 @@ describe("KonsekiApiClient", () => {
     );
     const client = createClient(fetchImpl);
 
-    await expect(client.getMetadata()).resolves.toMatchObject({
+    await expect(client.getMetadata("US")).resolves.toMatchObject({
       json: {
         error: "unauthorized",
         message: "Missing or invalid API key.",
@@ -126,7 +129,7 @@ describe("KonsekiApiClient", () => {
     );
     const client = createClient(fetchImpl);
 
-    await expect(client.getMetadata()).resolves.toMatchObject({
+    await expect(client.getMetadata("US")).resolves.toMatchObject({
       json: {
         compressed: true,
       },
@@ -139,7 +142,7 @@ describe("KonsekiApiClient", () => {
     const fetchImpl = vi.fn<typeof fetch>(async () => new Response("not json", { status: 502 }));
     const client = createClient(fetchImpl);
 
-    await expect(client.getMetadata()).resolves.toMatchObject({
+    await expect(client.getMetadata("US")).resolves.toMatchObject({
       message: "Konseki API returned a non-JSON response.",
       ok: false,
       status: 502,
@@ -151,7 +154,7 @@ describe("KonsekiApiClient", () => {
       throw new Error(`network failed for ${apiKey}`);
     });
     const client = createClient(fetchImpl);
-    const result = await client.getMetadata();
+    const result = await client.getMetadata("US");
 
     expect(result).toMatchObject({
       message: "Unable to reach Konseki API.",
@@ -166,7 +169,7 @@ describe("KonsekiApiClient", () => {
     });
     const client = createClient(fetchImpl);
 
-    await expect(client.getMetadata()).resolves.toMatchObject({
+    await expect(client.getMetadata("US")).resolves.toMatchObject({
       message: "Konseki API request timed out.",
       ok: false,
     });

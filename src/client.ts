@@ -37,21 +37,22 @@ export class KonsekiApiClient {
     this.timeoutMs = options?.timeoutMs ?? KONSEKI_REQUEST_TIMEOUT_MS;
   }
 
-  async getMetadata(): Promise<KonsekiApiResult> {
-    return this.request("/v1/metadata");
+  async getMetadata(country: string): Promise<KonsekiApiResult> {
+    return this.request(`/v1/metadata?${new URLSearchParams({ country }).toString()}`);
   }
 
   async listCountries(): Promise<KonsekiApiResult> {
     return this.request("/v1/countries");
   }
 
-  async listSymbols(): Promise<KonsekiApiResult> {
-    return this.request("/v1/symbols");
+  async listSymbols(country: string): Promise<KonsekiApiResult> {
+    return this.request(`/v1/symbols?${new URLSearchParams({ country }).toString()}`);
   }
 
-  async getAnalysis(params: { exchange: string; lookback: string; symbol: string }): Promise<KonsekiApiResult> {
+  async getAnalysis(params: { country: string; exchange: string; lookback: string; symbol: string }): Promise<KonsekiApiResult> {
     const symbolExchange = `${encodeURIComponent(params.symbol)}-${encodeURIComponent(params.exchange)}`;
     const searchParams = new URLSearchParams({
+      country: params.country,
       lookback: params.lookback,
     });
 

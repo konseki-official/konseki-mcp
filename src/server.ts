@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { KonsekiApiClient } from "./client.js";
 import {
   analysisInputSchema,
+  countryInputSchema,
   createAnalysisToolHandler,
   createCountriesToolHandler,
   createMetadataToolHandler,
@@ -17,7 +18,8 @@ export function createKonsekiMcpServer(client: KonsekiApiClient): McpServer {
   server.registerTool(
     "get_konseki_metadata",
     {
-      description: "Fetch raw metadata JSON from the Konseki public API.",
+      description: "Fetch raw metadata JSON for a country from the Konseki public API.",
+      inputSchema: countryInputSchema,
       title: "Get Konseki Metadata",
     },
     createMetadataToolHandler(client),
@@ -35,7 +37,8 @@ export function createKonsekiMcpServer(client: KonsekiApiClient): McpServer {
   server.registerTool(
     "list_konseki_symbols",
     {
-      description: "Fetch raw supported symbols JSON from the Konseki public API.",
+      description: "Fetch raw supported symbols JSON for a country from the Konseki public API.",
+      inputSchema: countryInputSchema,
       title: "List Konseki Symbols",
     },
     createSymbolsToolHandler(client),

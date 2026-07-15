@@ -34,6 +34,9 @@ describe("Konseki MCP server", () => {
     try {
       const toolList = await client.listTools();
       const countriesTool = toolList.tools.find((tool) => tool.name === "list_konseki_countries");
+      const metadataTool = toolList.tools.find((tool) => tool.name === "get_konseki_metadata");
+      const symbolsTool = toolList.tools.find((tool) => tool.name === "list_konseki_symbols");
+      const analysisTool = toolList.tools.find((tool) => tool.name === "get_konseki_analysis");
 
       expect(countriesTool).toMatchObject({
         description: "Fetch raw covered countries JSON from the Konseki public API.",
@@ -42,6 +45,9 @@ describe("Konseki MCP server", () => {
         },
         title: "List Konseki Countries",
       });
+      expect(metadataTool?.inputSchema.required).toContain("country");
+      expect(symbolsTool?.inputSchema.required).toContain("country");
+      expect(analysisTool?.inputSchema.required).toContain("country");
 
       const result = await client.callTool({
         arguments: {},
